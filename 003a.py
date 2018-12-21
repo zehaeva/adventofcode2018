@@ -3,6 +3,9 @@ class Point:
         self.x = x
         self.y = y
 
+    def __str__(self):
+        return "({}, {})".format(self.x, self.y)
+
 
 class Claim:
     number = ""
@@ -22,6 +25,9 @@ class Claim:
         self.w = w
         self.h = h
 
+    def __str__(self):
+        return "{} @ {} {}x{}".format(self.number, self.ul, self.w, self.h)
+
     # checks to see if two squares overlap
     def overlap(self, q):
         # check if on box is to the left of the other
@@ -36,9 +42,33 @@ class Claim:
 
     # gets square inches of overlapping areas
     def overlap_area(self, q):
-        width = 0
-        height = 0
+        width = min(self.lr.x, q.lr.x) - max(self.ul.x, q.ul.x) 
+        height = min(self.lr.y, q.lr.y) - max(self.ul.y, q.ul.y) 
+
         return width * height
+
+
+class Cloth:
+    reserved = [["." for n in range(0, 1000)] for n in range(0, 1000)]
+
+    def __init(self):
+        pass
+
+    def reserve(self, claim):
+        for x in range(claim.ul.x, claim.ur.x):
+            for y in range(claim.ul.y, claim.ll.y):
+                if self.reserved[x][y] == ".":
+                    self.reserved[x][y] = claim.number
+                else:
+                    self.reserved[x][y] = "X"
+    
+    def conflicts(self):
+        area = 0
+        for x in range(0, 1000):
+            for y in range(0, 1000):
+                if self.reserved[x][y] == "X":
+                    area += 1
+        return area
 
 
 # read in changes
@@ -50,21 +80,17 @@ area = 0
 # parse out data
 for line in file:
     data = line.split()
-    claim = Claim()
-    claim.number = data[0]
-    claim.x = int(data[2].split(",")[0])
-    claim.y = int(data[2].split(",")[1][:-1])
-    claim.w = int(data[3].split("x")[0])
-    claim.h = int(data[3].split("x")[1])
+    claim = Claim(data[0], int(data[2].split(",")[0]), int(data[2].split(",")[1][:-1]), int(data[3].split("x")[0]), int(data[3].split("x")[1]))
     claims.append(claim)
+
+cloth = Cloth()
 
 # cycle through all claims
 while len(claims) > 0:
     check = claims.pop()
-    
-    for claim in claims:
-        if check.overlap(claim):
-            area += check.overlap_area(claim)
+    cloth.reserve(check)
 
+area = cloth.conflicts()
 
-print(area)
+print("area {}".format(area))
+
