@@ -70,27 +70,44 @@ class Cloth:
                     area += 1
         return area
 
+    def find_conflict(self, claim):
+        found = False
+        for x in range(claim.ul.x, claim.lr.x):
+            for y in range(claim.ul.y, claim.lr.y):
+                if self.reserved[x][y] == "X":
+                    found = True
+                    break
+
+            if found:
+                break
+
+        return found
+
 
 # read in changes
 file = open("input003.txt", "r")
 
 claims = list()
 area = 0
+cloth = Cloth()
 
 # parse out data
 for line in file:
     data = line.split()
-    claim = Claim(data[0], int(data[2].split(",")[0]), int(data[2].split(",")[1][:-1]), int(data[3].split("x")[0]), int(data[3].split("x")[1]))
+    claim = Claim(data[0],
+                  int(data[2].split(",")[0]),
+                  int(data[2].split(",")[1][:-1]),
+                  int(data[3].split("x")[0]),
+                  int(data[3].split("x")[1]))
+    cloth.reserve(claim)
     claims.append(claim)
-
-cloth = Cloth()
-
-# cycle through all claims
-while len(claims) > 0:
-    check = claims.pop()
-    cloth.reserve(check)
 
 area = cloth.conflicts()
 
 print("area {}".format(area))
 
+# check for the one that does not have any conflicts
+while len(claims) > 0:
+    claim = claims.pop()
+    if not cloth.find_conflict(claim):
+        print("{}".format(claim))
